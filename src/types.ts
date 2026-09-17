@@ -3,7 +3,7 @@ export const STAGE_HEIGHT = 1920
 
 export type FrameStyle = 'meander' | 'octagon' | 'begonia' | 'square' | 'circular' | 'diamond'
 export type FrameId = 'frame01' | 'frame02' | 'frame03' | 'frame04' | 'frame05'
-export type CanvasRatio = '1x1' | '9x16' | '4x3'
+export type CanvasRatio = '1x1' | '9x16' | '16x9'
 export type BackgroundMode = 'solid'
 export type RegionMode = 'auto' | 'rectangle' | 'brush'
 export type SelectionShape = 'rectangle'

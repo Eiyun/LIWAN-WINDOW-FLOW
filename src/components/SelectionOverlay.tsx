@@ -4,6 +4,7 @@ interface SelectionOverlayProps {
   mode: RegionMode
   imageUrl: string
   imageRect: ImageDrawRect
+  imageMaskId: string | null
   adjustingImage: boolean
   selections: SelectionRegion[]
   draft: Omit<SelectionRegion, 'id'> | null
@@ -11,14 +12,14 @@ interface SelectionOverlayProps {
   dimensions: CanvasDimensions
 }
 
-export function SelectionOverlay({ mode, imageUrl, imageRect, adjustingImage, selections, draft, onSelectionDelete, dimensions }: SelectionOverlayProps) {
+export function SelectionOverlay({ mode, imageUrl, imageRect, imageMaskId, adjustingImage, selections, draft, onSelectionDelete, dimensions }: SelectionOverlayProps) {
   if (mode === 'auto' && !adjustingImage) return null
   const label = adjustingImage ? '拖动调整位置 · 滚轮缩放图片' : mode === 'brush' ? '直接涂抹 · 绿色添加 / 红色擦除' : '拖拽框选 · 参考图不会导出'
   const margin = Math.min(dimensions.width, dimensions.height) * .04
 
   return (
     <g data-export-ignore="true" className="selection-overlay">
-      <image href={imageUrl} x={imageRect.x} y={imageRect.y} width={imageRect.width} height={imageRect.height} preserveAspectRatio="none" filter="url(#sampling-guide)" />
+      <image href={imageUrl} x={imageRect.x} y={imageRect.y} width={imageRect.width} height={imageRect.height} preserveAspectRatio="none" mask={imageMaskId ? `url(#${imageMaskId})` : undefined} filter="url(#sampling-guide)" />
       <rect x={margin} y={margin} width={dimensions.width - margin * 2} height={dimensions.height - margin * 2} rx="8" fill="none" stroke="#dff7e7" strokeWidth="3" strokeDasharray="12 12" opacity=".5" />
       <g transform={`translate(${dimensions.width / 2} ${margin + 43})`}>
         <rect x="-228" y="-29" width="456" height="58" rx="29" fill="#071d28" opacity=".88" />

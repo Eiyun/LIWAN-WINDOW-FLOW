@@ -3,7 +3,8 @@ import { ControlPanel } from './components/ControlPanel'
 import { PreviewStage } from './components/PreviewStage'
 import { BrushMaskBuilder } from './core/brushMask'
 import { Exporter } from './core/Exporter'
-import { CANVAS_PRESETS, loadFrameDataUrl } from './core/FrameManifest'
+import { CANVAS_PRESETS, loadFrameAsset } from './core/FrameManifest'
+import { isInsideFrameOpening, type FrameOpening } from './core/FrameOpeningMask'
 import { getImageDrawRect, renderTransformedImage } from './core/imageTransform'
 import { RegionMaskBuilder } from './core/RegionMask'
 import { SubjectDetector } from './core/SubjectDetector'
@@ -61,6 +62,7 @@ function App() {
   const [canvasRatio, setCanvasRatio] = useState<CanvasRatio>('9x16')
   const [frameId, setFrameId] = useState<FrameId>('frame01')
   const [frameDataUrl, setFrameDataUrl] = useState<string | null>(null)
+  const [frameOpening, setFrameOpening] = useState<FrameOpening | null>(null)
   const [background, setBackground] = useState(defaultBackground)
   const [regionMode, setRegionMode] = useState<RegionMode>('auto')
   const [selections, setSelections] = useState<SelectionRegion[]>([])
@@ -74,7 +76,7 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [detectionRevision, setDetectionRevision] = useState(0)
   const [videoDuration, setVideoDuration] = useState<15 | 30 | 45 | 60>(15)
-  const [videoFormat, setVideoFormat] = useState<VideoFormat>('webm')
+  const [videoFormat, setVideoFormat] = useState<VideoFormat>('mp4')
   const [videoProgress, setVideoProgress] = useState<number | null>(null)
   const [videoNotice, setVideoNotice] = useState<string | null>(null)
   const dimensions = CANVAS_PRESETS[canvasRatio]
@@ -156,8 +158,13 @@ function App() {
   useEffect(() => {
     let cancelled = false
     setFrameDataUrl(null)
-    loadFrameDataUrl(canvasRatio, frameId)
-      .then((url) => { if (!cancelled) setFrameDataUrl(url) })
+    setFrameOpening(null)
+    loadFrameAsset(canvasRatio, frameId)
+      .then((asset) => {
+        if (cancelled) return
+        setFrameDataUrl(asset.dataUrl)
+        setFrameOpening(asset.opening)
+      })
       .catch((reason) => { if (!cancelled) setError(reason instanceof Error ? reason.message : '花窗加载失败。') })
     return () => { cancelled = true }
   }, [canvasRatio, frameId])
@@ -181,8 +188,9 @@ function App() {
 
   const cells = useMemo(() => {
     if (!prepared || !activeDetection) return []
-    return renderer.render(prepared.imageData, activeDetection, text, typography)
-  }, [activeDetection, prepared, renderer, text, typography])
+    const generated = renderer.render(prepared.imageData, activeDetection, text, typography)
+    return frameOpening ? generated.filter((cell) => isInsideFrameOpening(frameOpening, cell.x, cell.y, dimensions)) : generated
+  }, [activeDetection, dimensions, frameOpening, prepared, renderer, text, typography])
 
   const addSelection = (selection: Omit<SelectionRegion, 'id'>) => {
     setSelections((current) => [...current, { ...selection, id: makeId() }])
@@ -231,12 +239,12 @@ function App() {
       const actualFormat = await VideoExporter.export(svgRef.current, {
         durationSeconds: videoDuration,
         format: videoFormat,
+        animation,
         filename: `荔窗流影_${canvasRatio}_${videoDuration}s.${videoFormat}`,
         signal: controller.signal,
         onProgress: setVideoProgress,
       })
-      if (actualFormat !== videoFormat) setVideoNotice('当前浏览器不支持 MP4，已自动导出 WebM。')
-      else setVideoNotice(`视频已导出 · ${actualFormat.toUpperCase()}`)
+      setVideoNotice(`视频已导出 · ${actualFormat.toUpperCase()}`)
     } catch (reason) {
       if (reason instanceof DOMException && reason.name === 'AbortError') setVideoNotice('视频导出已取消。')
       else setError(reason instanceof Error ? reason.message : '视频导出失败。')
@@ -323,6 +331,7 @@ function App() {
           background={background}
           dimensions={dimensions}
           frameDataUrl={frameDataUrl}
+          frameOpeningMaskDataUrl={frameOpening?.dataUrl || null}
           regionMode={regionMode}
           selections={selections}
           brush={brush}

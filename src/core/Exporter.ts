@@ -14,6 +14,15 @@ function svgDimensions(svg: SVGSVGElement) {
   return { width: box.width || 1080, height: box.height || 1920 }
 }
 
+export function serializeSvgInPlace(svg: SVGSVGElement) {
+  const dimensions = svgDimensions(svg)
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+  svg.setAttribute('width', String(dimensions.width))
+  svg.setAttribute('height', String(dimensions.height))
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(svg)}`
+}
+
 export function serializeSvg(svg: SVGSVGElement, settleAnimation = true, omitFrame = false) {
   const clone = svg.cloneNode(true) as SVGSVGElement
   clone.querySelectorAll('[data-export-ignore]').forEach((node) => node.remove())
@@ -23,13 +32,7 @@ export function serializeSvg(svg: SVGSVGElement, settleAnimation = true, omitFra
       node.setAttribute('transform', node.dataset.cellBaseTransform || '')
     })
   clone.querySelectorAll<SVGGElement>('[data-layer="subject-typographic"]').forEach((node) => node.setAttribute('opacity', '1'))
-  const dimensions = svgDimensions(svg)
-  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-  clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
-  clone.setAttribute('width', String(dimensions.width))
-  clone.setAttribute('height', String(dimensions.height))
-  const source = new XMLSerializer().serializeToString(clone)
-  return `<?xml version="1.0" encoding="UTF-8"?>\n${source}`
+  return serializeSvgInPlace(clone)
 }
 
 export class Exporter {

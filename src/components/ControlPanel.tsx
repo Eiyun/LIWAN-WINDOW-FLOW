@@ -349,7 +349,7 @@ export function ControlPanel(props: ControlPanelProps) {
         <SectionTitle number="07" title="花窗与背景" english="Frame & Background" description="同一 Frame ID 自动匹配三种画布比例" />
         <div className="field-label">画布比例 <small>Canvas Ratio</small></div>
         <div className="ratio-options">
-          {([['1x1', '正方形', '1:1'], ['9x16', '竖版', '9:16'], ['4x3', '横版', '4:3']] as const).map(([ratio, label, english]) => <button key={ratio} className={props.canvasRatio === ratio ? 'active' : ''} onClick={() => props.onCanvasRatioChange(ratio)}><span>{label}<small>{english}</small></span></button>)}
+          {([['1x1', '正方形', '1:1'], ['9x16', '竖版', '9:16'], ['16x9', '横版', '16:9']] as const).map(([ratio, label, english]) => <button key={ratio} className={props.canvasRatio === ratio ? 'active' : ''} onClick={() => props.onCanvasRatioChange(ratio)}><span>{label}<small>{english}</small></span></button>)}
         </div>
         <div className="field-label">花窗选择 <small>Window Frame</small></div>
         <div className="frame-thumbnails">
@@ -372,7 +372,7 @@ export function ControlPanel(props: ControlPanelProps) {
         <div className="video-export-settings">
           <div className="field-label">视频时长 <small>Video Duration</small></div>
           <div className="video-duration-options">{([15, 30, 45, 60] as const).map((duration) => <button key={duration} className={props.videoDuration === duration ? 'active' : ''} onClick={() => props.onVideoDurationChange(duration)}>{duration}秒<small>{duration}s</small></button>)}</div>
-          <label className="select-field"><span>视频格式 <small>Video Format</small></span><div><Download size={14} /><select value={props.videoFormat} onChange={(event) => props.onVideoFormatChange(event.target.value as VideoFormat)}><option value="webm">WebM</option><option value="mp4">MP4 {props.mp4Supported ? '（支持）' : '（自动回退 WebM）'}</option></select></div></label>
+          <label className="select-field"><span>视频格式 <small>Video Format</small></span><div><Download size={14} /><select value={props.videoFormat} onChange={(event) => props.onVideoFormatChange(event.target.value as VideoFormat)}><option value="mp4">MP4 {props.mp4Supported ? '（推荐）' : '（浏览器需支持 H.264）'}</option><option value="webm">WebM</option></select></div></label>
           {props.videoProgress === null ? <button className="video-export-button" onClick={props.onExportVideo} disabled={!props.detection || props.isBusy}><Download size={16} /><span>导出视频<small>Export Video</small></span></button> : <div className="video-progress"><div><span>导出进度 <small>Export Progress</small></span><b>{Math.round(props.videoProgress * 100)}%</b></div><i><em style={{ width: `${props.videoProgress * 100}%` }} /></i><button onClick={props.onCancelVideo}>取消导出 <small>Cancel Export</small></button></div>}
           {props.videoNotice && <p className="video-notice">{props.videoNotice}</p>}
         </div>

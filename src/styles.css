@@ -446,8 +446,10 @@ button { color: inherit; }
 .cell-counter { color: #5d7776; font-size: 8px; letter-spacing: .12em; text-align: right; }
 .cell-counter span { display: block; margin-bottom: 2px; color: #5faf78; font-size: 15px; font-weight: 600; letter-spacing: .02em; }
 
-.preview-wrap { display: flex; min-height: 0; flex: 1; flex-direction: column; align-items: center; }
+.preview-wrap { display: flex; width: 100%; min-width: 0; min-height: 0; flex: 1; flex-direction: column; align-items: center; }
 .stage-toolbar { display: flex; width: min(calc((100vh - 145px) * .5625), 520px); max-width: 100%; justify-content: space-between; margin-bottom: 8px; color: #647c7a; font-size: 8px; letter-spacing: .08em; }
+.stage-toolbar.ratio-square { width: min(calc(100vh - 170px), 650px); }
+.stage-toolbar.ratio-landscape { width: min(calc((100vh - 170px) * 1.7778), 960px); }
 .stage-label { display: flex; gap: 6px; align-items: center; }
 .stage-label i { width: 5px; height: 5px; background: #5faf78; border-radius: 50%; box-shadow: 0 0 7px #5faf78; }
 .animation-status { color: #87a99d; }
@@ -463,7 +465,7 @@ button { color: inherit; }
   box-shadow: 0 28px 70px rgba(0, 0, 0, .44), 0 0 0 7px rgba(80, 65, 49, .07);
 }
 .stage-shell.ratio-square { width: min(calc(100vh - 170px), 650px); }
-.stage-shell.ratio-landscape { width: min(calc((100vh - 170px) * 1.3333), 820px); }
+.stage-shell.ratio-landscape { width: min(calc((100vh - 170px) * 1.7778), 960px); }
 
 .preview-svg { display: block; width: 100%; height: 100%; }
 .stage-shell.selection-enabled .preview-svg { cursor: crosshair; touch-action: none; user-select: none; }
@@ -494,6 +496,7 @@ button { color: inherit; }
   .stage-shell { width: min(100%, 430px); }
   .stage-shell.ratio-square, .stage-shell.ratio-landscape { width: min(100%, 620px); }
   .stage-toolbar { width: min(100%, 430px); }
+  .stage-toolbar.ratio-square, .stage-toolbar.ratio-landscape { width: min(100%, 620px); }
   .preview-caption { letter-spacing: .08em; }
   .mode-switch button { min-height: 58px; }
   .brush-mode-buttons button, .history-buttons button { min-height: 48px; }

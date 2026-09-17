@@ -30,6 +30,7 @@ interface PreviewStageProps {
   background: BackgroundSettings
   dimensions: CanvasDimensions
   frameDataUrl: string | null
+  frameOpeningMaskDataUrl: string | null
   regionMode: RegionMode
   selections: SelectionRegion[]
   brush: BrushSettings
@@ -64,6 +65,7 @@ export const PreviewStage = forwardRef<SVGSVGElement, PreviewStageProps>(functio
     background,
     dimensions,
     frameDataUrl,
+    frameOpeningMaskDataUrl,
     regionMode,
     selections,
     brush,
@@ -212,7 +214,7 @@ export const PreviewStage = forwardRef<SVGSVGElement, PreviewStageProps>(functio
 
   return (
     <div className="preview-wrap">
-      <div className="stage-toolbar">
+      <div className={`stage-toolbar ${ratioClass}`}>
         <span className="stage-label"><i /> {dimensions.width} × {dimensions.height}</span>
         <span className="animation-status">{status}</span>
       </div>
@@ -233,6 +235,7 @@ export const PreviewStage = forwardRef<SVGSVGElement, PreviewStageProps>(functio
           onWheel={handleWheel}
         >
           <defs>
+            {frameOpeningMaskDataUrl && <mask id="frame-opening-mask" x="0" y="0" width={dimensions.width} height={dimensions.height} maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse"><image href={frameOpeningMaskDataUrl} width={dimensions.width} height={dimensions.height} preserveAspectRatio="none" /></mask>}
             <filter id="letter-glow" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur in="SourceAlpha" stdDeviation="1.05" result="blur" /><feFlood floodColor="#5FAF78" floodOpacity=".16" result="color" /><feComposite in="color" in2="blur" operator="in" result="shadow" /><feMerge><feMergeNode in="shadow" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
             <filter id="sampling-guide" x="-2%" y="-2%" width="104%" height="104%"><feColorMatrix type="saturate" values=".6" /><feComponentTransfer><feFuncA type="linear" slope=".34" /></feComponentTransfer></filter>
           </defs>
@@ -248,14 +251,14 @@ export const PreviewStage = forwardRef<SVGSVGElement, PreviewStageProps>(functio
             <text y="403" textAnchor="middle" fill="#eaf5ee" fontFamily="sans-serif" fontSize="17" letterSpacing="5" opacity=".4">UPLOAD TO CREATE</text>
           </g>}
 
-          <g ref={typographyGroupRef} data-layer="subject-typographic" filter="url(#letter-glow)" fontFamily="'Noto Serif SC', 'Songti SC', 'SimSun', serif" textAnchor="middle">
+          <g ref={typographyGroupRef} data-layer="subject-typographic" mask={frameOpeningMaskDataUrl ? 'url(#frame-opening-mask)' : undefined} filter="url(#letter-glow)" fontFamily="'Noto Serif SC', 'Songti SC', 'SimSun', serif" textAnchor="middle">
             {cells.map((cell) => {
               const baseTransform = `rotate(${cell.rotation.toFixed(2)} ${cell.x.toFixed(2)} ${cell.y.toFixed(2)})`
               return <text key={cell.id} x={cell.x} y={cell.y} fill={cell.fill} fontSize={cell.fontSize} fontWeight={cell.weight} data-cell-opacity={cell.opacity.toFixed(4)} data-cell-x={cell.x.toFixed(2)} data-cell-y={cell.y.toFixed(2)} data-cell-base-transform={baseTransform} transform={baseTransform}>{cell.char}</text>
             })}
           </g>
 
-          {imageUrl && imageDrawRect && <SelectionOverlay mode={regionMode} imageUrl={imageUrl} imageRect={imageDrawRect} adjustingImage={canAdjustImage} selections={selections} draft={draft} onSelectionDelete={onSelectionDelete} dimensions={dimensions} />}
+          {imageUrl && imageDrawRect && <SelectionOverlay mode={regionMode} imageUrl={imageUrl} imageRect={imageDrawRect} imageMaskId={frameOpeningMaskDataUrl ? 'frame-opening-mask' : null} adjustingImage={canAdjustImage} selections={selections} draft={draft} onSelectionDelete={onSelectionDelete} dimensions={dimensions} />}
           <BrushSelection active={canBrush} settings={brush} frameColor="#5FAF78" dimensions={dimensions} onStrokeComplete={onBrushStrokeComplete} />
 
           {frameDataUrl && <image href={frameDataUrl} width={dimensions.width} height={dimensions.height} preserveAspectRatio="none" data-layer="window-frame-png" pointerEvents="none" style={{ userSelect: 'none' }} />}
